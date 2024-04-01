@@ -1,9 +1,11 @@
 import RouteApp from "./routes/index"
+import { StyledEngineProvider } from "@mui/material/styles";
+
 function App() {
   return (
-    <div>
-      <RouteApp/>
-    </div>
+    <StyledEngineProvider injectFirst>
+      <RouteApp />
+    </StyledEngineProvider>
   );
 }
 

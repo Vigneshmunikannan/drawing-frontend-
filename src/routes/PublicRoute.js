@@ -1,13 +1,13 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "../pages/Home"
-import Error from "../pages/Error";
-import Admin from "../pages/Admin";
-import Works from "../pages/Works";
-import Otherservices from "../pages/Otherservices";
-import Team from "../pages/Team";
-import Aboutus from "../pages/Aboutus";
-import Terms from "../pages/Terms";
-import Privacypolicy from "../pages/Privacypolicy";
+import Home from "../publicpages/Home";
+import Error from "../publicpages/Error";
+import Admin from "../publicpages/Admin";
+import Works from "../publicpages/Works";
+import Otherservices from "../publicpages/Otherservices";
+import Team from "../publicpages/Team";
+import Aboutus from "../publicpages/Aboutus";
+import Terms from "../publicpages/Terms";
+import Privacypolicy from "../publicpages/Privacypolicy";
 
 const PublicRoute = () => {
     return (
