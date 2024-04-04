@@ -9,6 +9,14 @@ function Admin() {
   const [response, setResponse] = useState('');
 
   const handleLogin = async () => {
+    if (username === "" || password === "") {
+      setResponse("Enter both username and password");
+      setTimeout(() => {
+        setResponse("");
+      }
+        , 2000)
+      return;
+    }
     try {
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/login`, {
         username,
