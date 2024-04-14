@@ -5,28 +5,28 @@ import Addorder from '../protectedpages/Addorder';
 import Createuser from '../protectedpages/Createuser';
 import Orders from '../protectedpages/Orders';
 import Header from "../protectedpages/header";
-import { useAuth } from "../routes/Context";
-import Error from '../publicpages/Error';
+import Error from '../protectedpages/Error';
 import Edituser from '../protectedpages/Edituser';
+import { useAuth } from "../routes/Context";
 export default function PrivateRoute() {
     const { isValidToken } = useAuth();
     return (
         <div>
-            {
-                isValidToken() && <div>
-
-                    <Header />
-                    <Routes>
-                        <Route path="/home" element={<Statistics />} />
-                        <Route path="/add-order" element={<Addorder />} />
-                        <Route path="/create-user" element={<Createuser />} />
-                        <Route path="/orders" element={<Orders />} />
-                        <Route path="/edit-user" element={<Edituser />} />
-                        <Route path="*" element={<Error />} />
-                    </Routes>
-                </div>
-
-            }
+            <div>
+                {
+                    isValidToken() && <Header />
+                }
+                <Routes>
+                    <Route path="/home" element={<Statistics />} />
+                    <Route path="/add-order" element={<Addorder />} />
+                    <Route path="/create-user" element={<Createuser />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/edit-user" element={<Edituser />} />
+                    {
+                        isValidToken() && <Route path="*" element={<Error />} />
+                    }
+                </Routes>
+            </div>
 
 
         </div>

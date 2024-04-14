@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Typography, Grid, Paper } from '@mui/material';
 import { useAuth } from "../routes/Context";
+
 function Admin() {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
@@ -13,8 +13,7 @@ function Admin() {
       setResponse("Enter both username and password");
       setTimeout(() => {
         setResponse("");
-      }
-        , 2000)
+      }, 2000);
       return;
     }
     try {
@@ -22,61 +21,49 @@ function Admin() {
         username,
         password
       });
+      // Handle login logic here
       login(response.data.token)
       setResponse("Login success");
       setTimeout(() => {
         setResponse("");
-      }
-        , 2000)
-
+      }, 2000);
     } catch (error) {
       setResponse(error.response.data);
       setTimeout(() => {
         setResponse("");
-      }
-        , 2000)
-
+      }, 2000);
     }
   };
 
   return (
-    <Grid container justifyContent="center" alignItems="center" style={{ height: '100vh' }}>
-      <Grid item xs={10} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: '20px' }}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            Login
-          </Typography>
-          <TextField
-            label="Username"
-            variant="outlined"
-            fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            type="password"
-            label="Password"
-            variant="outlined"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-          />
-
-          {response && (
-            <Typography color="error" align="center" style={{ marginTop: '20px' }}>
-              {response}
-            </Typography>
-          )}
-
-          <Button variant="contained" color="primary" fullWidth onClick={handleLogin} style={{ marginTop: '20px' }}>
-            Login
-          </Button>
-
-        </Paper>
-      </Grid>
-    </Grid>
+    <div className="flex justify-center items-center h-screen">
+      <div className="bg-white shadow-md rounded-md p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">Login</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="border border-gray-300 rounded-md p-2 w-full mb-4"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border border-gray-300 rounded-md p-2 w-full mb-4"
+        />
+        {response && (
+          <p className="text-red-500 text-center mb-4">{response}</p>
+        )}
+        <button
+          className="bg-blue-500 text-white rounded-md py-2 px-4 w-full"
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+      </div>
+    </div>
   );
 }
 

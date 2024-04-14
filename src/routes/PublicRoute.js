@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "../publicpages/Home";
-import Error from "../publicpages/Error";
+import Error from "../protectedpages/Error"
 import Admin from "../publicpages/Admin";
 import Works from "../publicpages/Works";
 import Otherservices from "../publicpages/Otherservices";

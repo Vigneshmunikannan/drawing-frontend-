@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { ColorSwatchIcon } from '@heroicons/react/solid';
 
 const AuthContext = createContext();
 
@@ -10,6 +11,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (tokenValue) => {
         setToken(tokenValue);
+        console.log(tokenValue);
         Cookies.set('token', tokenValue, { expires: 1 }); // Expires in 1 day
         navigate('/home');
     };
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setToken('');
         Cookies.remove('token');
-        navigate('/admin');
+        navigate('/admin',{replace:true});
     };
 
     const getToken = () => {
@@ -27,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     const isValidToken = () => {
         return token !== null && typeof token === 'string' && token.trim() !== '';
     };
+    
 
 
     return (

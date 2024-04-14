@@ -1,10 +1,19 @@
-import React from 'react'
+import React ,{useEffect} from 'react'
+import { useAuth } from "../routes/Context";
+import { useNavigate } from 'react-router-dom';
 export default function Orders() {
-    console.log(process.env.REACT_APP_BACKEND_URL)
-    return (
-        <div>
-            Orders
-            {process.env.REACT_APP_BACKEND_URL}
-        </div>
-    )
+  const { isValidToken } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isValidToken()) {
+      navigate('/admin', { replace: true });
+    }
+  }, []);
+
+  return (
+    <div>
+      Orders
+    </div>
+  );
 }
+
