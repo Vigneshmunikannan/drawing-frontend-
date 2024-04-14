@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { ColorSwatchIcon } from '@heroicons/react/solid';
 
 const AuthContext = createContext();
 

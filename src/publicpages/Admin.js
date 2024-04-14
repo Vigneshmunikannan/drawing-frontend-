@@ -17,7 +17,7 @@ function Admin() {
       return;
     }
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/login`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}admin/login`, {
         username,
         password
       });
