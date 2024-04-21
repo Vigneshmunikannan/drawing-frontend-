@@ -8,6 +8,7 @@ import Header from "../protectedpages/header";
 import Error from '../protectedpages/Error';
 import Edituser from '../protectedpages/Edituser';
 import { useAuth } from "../routes/Context";
+import Portfolio from '../protectedpages/Portfolio';
 export default function PrivateRoute() {
     const { isValidToken } = useAuth();
     return (
@@ -22,6 +23,7 @@ export default function PrivateRoute() {
                     <Route path="/create-user" element={<Createuser />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/edit-user" element={<Edituser />} />
+                    <Route path="/artist/:artistId" element={<Portfolio />} />
                     {
                         isValidToken() && <Route path="*" element={<Error />} />
                     }

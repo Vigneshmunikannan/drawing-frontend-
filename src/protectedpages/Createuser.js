@@ -74,8 +74,9 @@ export default function Createuser() {
       }
     } catch (error) {
       if (error.response) {
+        console.log(error.response.data.error)
         // Check if error.response.data exists before accessing its properties
-        setErrorMessage(error.response.data.message || 'An unexpected error occurred. Please try again later.');
+        setErrorMessage(error.response.data.error || 'An unexpected error occurred. Please try again later.');
         setTimeout(() => {
           setErrorMessage('');
         }, 2000);
