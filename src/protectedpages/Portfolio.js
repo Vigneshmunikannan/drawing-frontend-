@@ -85,6 +85,9 @@ export default function Portfolio() {
                 logout();
             } else {
                 setErrorMessage('Failed to add work. Please try again later.');
+                setTimeout(() => {
+                    setErrorMessage('');
+                }, 2000)
             }
         }
     };

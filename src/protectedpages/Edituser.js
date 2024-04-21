@@ -108,12 +108,16 @@ export default function Edituser() {
 
       // Clear success message after 2 seconds
       setTimeout(() => {
-        window.location.reload(); 
+        window.location.reload();
         setSuccessMessage("");
       }, 2000);
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        logout(); // Logout on 401 Unauthorized error
+        logout();
+        setErrorMessage('Unauthorized. Please login again.');
+        setTimeout(() => {
+          setErrorMessage("")
+        }, 2000);
         return;
       }
       // Handle error message
@@ -157,7 +161,7 @@ export default function Edituser() {
 
       {selectedArtist && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center overflow-auto">
-          
+
           <div className="bg-white p-6 rounded-lg min-w-screen-lg mx-auto relative z-10 overflow-auto pt-52">
             <div className="mb-4 flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-full overflow-hidden mb-4">
