@@ -3,6 +3,7 @@ import axios from 'axios';
 import MessageComponent from './Message';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../routes/Context";
+
 const Orders = () => {
   const { isValidToken, logout } = useAuth();
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Orders = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [orders, setOrders] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!isValidToken()) {
@@ -45,20 +47,20 @@ const Orders = () => {
       setErrorMessage('Unauthorized access. Please log in again.');
       logout();
     } else {
-      setErrorMessage('An error occurred while fetching data. Please try again later.');
+      setErrorMessage('An error occurred while updating data. Please try again later.');
     }
   };
 
   const handleAssignArtist = async (orderId, artistId) => {
     try {
-      console.log(orderId, artistId)
       const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
         assartist: artistId
       });
       if (res.status === 200) {
-        setSuccessMessage('Assigned artist successfully!');
+        setSuccessMessage(res.data.message);
         setTimeout(() => {
           setSuccessMessage('');
+          window.location.reload();
         }, 2000);
       }
     } catch (error) {
@@ -66,15 +68,17 @@ const Orders = () => {
     }
   };
 
-  const handleUpdateOrderDelivered = async (orderId) => {
+  const handleToggleDeliveredStatus = async (orderId, currentStatus) => {
     try {
+      const newDeliverStatus = !currentStatus;
       const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
-        orderDelivered: true
+        orderDelivered: newDeliverStatus
       });
       if (res.status === 200) {
-        setSuccessMessage('Updated order delivered status successfully!');
+        setSuccessMessage(res.data.message);
         setTimeout(() => {
           setSuccessMessage('');
+          window.location.reload();
         }, 2000);
       }
     } catch (error) {
@@ -82,21 +86,60 @@ const Orders = () => {
     }
   };
 
-  const handleUpdatePaymentStatus = async (orderId) => {
+  const handleTogglePaymentStatus = async (orderId, currentStatus) => {
     try {
+      const newPaymentStatus = !currentStatus;
       const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
-        paymentStatus: true
+        paymentStatus: newPaymentStatus
       });
       if (res.status === 200) {
-        setSuccessMessage('Updated payment status successfully!');
+        setSuccessMessage(res.data.message);
         setTimeout(() => {
           setSuccessMessage('');
+          window.location.reload();
         }, 2000);
       }
     } catch (error) {
       handleErrorResponse(error);
     }
   };
+
+  const handleImageChange = async (e, orderId) => {
+    const file = e.target.files[0]; // Get the selected file
+    const formData = new FormData();
+    formData.append('image', file); // Append the file to FormData
+  
+    try {
+      const res = await axios.patch(
+        `${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Set content type to multipart/form-data
+          },
+        }
+      );
+      if (res.status === 200) {
+        setSuccessMessage('Image updated successfully!');
+        setTimeout(() => {
+          setSuccessMessage('');
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      handleErrorResponse(error);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const searchRegex = new RegExp(searchTerm, 'i');
+    return (
+      searchRegex.test(order.name) ||
+      searchRegex.test(order._id) ||
+      searchRegex.test(order.email) ||
+      searchRegex.test(order.mobileNumber)
+    );
+  });
 
   return (
     <div className="container mx-auto py-8">
@@ -104,40 +147,98 @@ const Orders = () => {
       {errorMessage && <MessageComponent type="error" message={errorMessage} />}
 
       <h2 className="text-2xl font-bold mb-4">Order List</h2>
+      
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Name, Order ID, Email, or Mobile Number"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border border-gray-300 rounded-md px-4 py-2 w-full"
+        />
+      </div>
+      
       <table className="table-auto w-full">
         <thead>
           <tr>
             <th className="px-4 py-2">Order ID</th>
             <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Mobile Number</th>
+            <th className="px-4 py-2">Contact</th>
             <th className="px-4 py-2">Payment Status</th>
             <th className="px-4 py-2">Order Delivered</th>
             <th className="px-4 py-2">Requested Artist</th>
             <th className="px-4 py-2">Assigned Artist</th>
             <th className="px-4 py-2">Image</th>
-            <th className="px-4 py-2">Action</th>
           </tr>
         </thead>
         <tbody>
-          {orders.map(order => (
+          {filteredOrders.map(order => (
             <tr key={order._id}>
               <td className="border px-4 py-2">{order._id}</td>
               <td className="border px-4 py-2">{order.name}</td>
-              <td className="border px-4 py-2">{order.mobileNumber}</td>
+              <td className="border px-4 py-2">
+                <div className="flex flex-col space-y-2">
+                  <div>
+                    <button
+                      onClick={() => window.open(`https://wa.me/${order.mobileNumber}`, '_blank')}
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold rounded px-4 py-2"
+                    >
+                      WhatsApp
+                    </button>
+                    {order.mobileNumber}
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => window.open(`mailto:${order.email}`, '_blank')}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded px-4 py-2"
+                    >
+                      Send Email
+                    </button>
+                    {order.email}
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`, '_blank')}
+                      className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold rounded px-4 py-2"
+                    >
+                      Map Location
+                    </button>
+                    <br />
+                    {order.address}
+                    <div>
+                      <button
+                        onClick={() => window.open(`tel:${order.mobileNumber}`)}
+                        className="bg-purple-500 hover:bg-purple-700 text-white font-bold rounded px-4 py-2"
+                      >
+                        Make a Call
+                      </button>
+                      {order.mobileNumber}
+                    </div>
+                  </div>
+                </div>
+              </td>
               <td className="border px-4 py-2" style={{ color: order.paymentStatus ? 'green' : 'red' }}>
-                {order.paymentStatus ? 'Paid' : 'Unpaid'}
+                <button
+                  onClick={() => handleTogglePaymentStatus(order._id, order.paymentStatus)}
+                  className={`text-white font-bold rounded mb-2 ${order.paymentStatus ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700'}`}
+                >
+                  {order.paymentStatus ? 'Mark as Unpaid' : 'Mark as Paid'}
+                </button>
               </td>
               <td className="border px-4 py-2" style={{ color: order.orderDelivered ? 'green' : 'red' }}>
-                {order.orderDelivered ? 'Delivered' : 'Not Delivered'}
+                <button
+                  onClick={() => handleToggleDeliveredStatus(order._id, order.orderDelivered)}
+                  className={`text-white font-bold rounded mb-2 ${order.orderDelivered ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700'}`}
+                >
+                  {order.orderDelivered ? 'Mark as Undelivered' : 'Mark as Delivered'}
+                </button>
               </td>
               <td className="border px-4 py-2">
-                {/* Find the requested artist for the current order */}
                 {(function () {
                   const requestedArtist = artists.find(artist => artist._id === order.reqartist);
                   return requestedArtist ? requestedArtist.name : "Artist Not Requested";
                 })()}
               </td>
-
               <td className="border px-4 py-2">
                 <select
                   onChange={(e) => handleAssignArtist(order._id, e.target.value)}
@@ -150,25 +251,18 @@ const Orders = () => {
                     </option>
                   ))}
                 </select>
-
               </td>
-              <td className="border px-4 py-2">
-                <img src={`${process.env.REACT_APP_IMAGE_URL}${order.imageUrl}`} alt={`Orderimage${order._id}`} className="w-full h-48 object-cover rounded-md mb-4" />
-              </td>
-
-              <td className="border px-4 py-2 flex flex-col items-center justify-center h-full">
-                <button
-                  onClick={() => handleUpdatePaymentStatus(order._id)}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold  rounded mb-2"
-                >
-                  Update Payment Status
-                </button>
-                <button
-                  onClick={() => handleUpdateOrderDelivered(order._id)}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold  rounded"
-                >
-                  Update Order Delivered
-                </button>
+              <td className="border px-4 py-2 min-w-52">
+                <img
+                  src={`${process.env.REACT_APP_IMAGE_URL}${order.imageUrl}`}
+                  alt={`Orderimage${order._id}`}
+                  className="w-full h-48 object-cover rounded-md mb-4"
+                />
+                <input
+                  type="file"
+                  onChange={(e) => handleImageChange(e, order._id)}
+                  accept="image/*"
+                />
               </td>
             </tr>
           ))}
