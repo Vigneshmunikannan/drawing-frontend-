@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import MessageComponent from './Message';
@@ -12,6 +13,9 @@ const Orders = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const[totalCount,settotalCount]=useState(0)
 
   useEffect(() => {
     if (!isValidToken()) {
@@ -22,7 +26,7 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
     fetchArtists();
-  }, []);
+  }, [currentPage]);
 
   const fetchArtists = async () => {
     try {
@@ -35,8 +39,16 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}artists/order/getall`);
-      setOrders(res.data);
+      const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}artists/order/getall`, {
+        params: {
+          page: currentPage,
+          limit: 10
+        }
+      });
+      console.log(res)
+      setOrders(res.data.orders);
+      setTotalPages(res.data.totalPages);
+      settotalCount(res.data.totalCount);
     } catch (error) {
       handleErrorResponse(error);
     }
@@ -68,47 +80,12 @@ const Orders = () => {
     }
   };
 
-  const handleToggleDeliveredStatus = async (orderId, currentStatus) => {
-    try {
-      const newDeliverStatus = !currentStatus;
-      const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
-        orderDelivered: newDeliverStatus
-      });
-      if (res.status === 200) {
-        setSuccessMessage(res.data.message);
-        setTimeout(() => {
-          setSuccessMessage('');
-          window.location.reload();
-        }, 2000);
-      }
-    } catch (error) {
-      handleErrorResponse(error);
-    }
-  };
-
-  const handleTogglePaymentStatus = async (orderId, currentStatus) => {
-    try {
-      const newPaymentStatus = !currentStatus;
-      const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
-        paymentStatus: newPaymentStatus
-      });
-      if (res.status === 200) {
-        setSuccessMessage(res.data.message);
-        setTimeout(() => {
-          setSuccessMessage('');
-          window.location.reload();
-        }, 2000);
-      }
-    } catch (error) {
-      handleErrorResponse(error);
-    }
-  };
-
+  // Other handle functions...
   const handleImageChange = async (e, orderId) => {
     const file = e.target.files[0]; // Get the selected file
     const formData = new FormData();
     formData.append('image', file); // Append the file to FormData
-  
+
     try {
       const res = await axios.patch(
         `${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`,
@@ -130,8 +107,42 @@ const Orders = () => {
       handleErrorResponse(error);
     }
   };
+  const handleTogglePaymentStatus = async (orderId, currentStatus) => {
+    try {
+      const newPaymentStatus = !currentStatus;
+      const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
+        paymentStatus: newPaymentStatus
+      });
+      if (res.status === 200) {
+        setSuccessMessage(res.data.message);
+        setTimeout(() => {
+          setSuccessMessage('');
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      handleErrorResponse(error);
+    }
+  };
+  const handleToggleDeliveredStatus = async (orderId, currentStatus) => {
+    try {
+      const newDeliverStatus = !currentStatus;
+      const res = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}artists/order/updateOrder/${orderId}`, {
+        orderDelivered: newDeliverStatus
+      });
+      if (res.status === 200) {
+        setSuccessMessage(res.data.message);
+        setTimeout(() => {
+          setSuccessMessage('');
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      handleErrorResponse(error);
+    }
+  };
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders && orders.filter(order => {
     const searchRegex = new RegExp(searchTerm, 'i');
     return (
       searchRegex.test(order.name) ||
@@ -140,14 +151,21 @@ const Orders = () => {
       searchRegex.test(order.mobileNumber)
     );
   });
+  
+
+  const goToPage = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="container mx-auto py-8">
       {successMessage && <MessageComponent type="success" message={successMessage} />}
       {errorMessage && <MessageComponent type="error" message={errorMessage} />}
 
-      <h2 className="text-2xl font-bold mb-4">Order List</h2>
-      
+      <h2 className="text-2xl font-bold mb-4">Order List - {totalCount}</h2>
+
       <div className="mb-4">
         <input
           type="text"
@@ -157,18 +175,18 @@ const Orders = () => {
           className="border border-gray-300 rounded-md px-4 py-2 w-full"
         />
       </div>
-      
+
       <table className="table-auto w-full">
         <thead>
           <tr>
-            <th className="px-4 py-2">Order ID</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Contact</th>
-            <th className="px-4 py-2">Payment Status</th>
-            <th className="px-4 py-2">Order Delivered</th>
-            <th className="px-4 py-2">Requested Artist</th>
-            <th className="px-4 py-2">Assigned Artist</th>
-            <th className="px-4 py-2">Image</th>
+            <th className="border px-4 py-2">Order ID</th>
+            <th className="border px-4 py-2">Name</th>
+            <th className="border px-4 py-2">Contact</th>
+            <th className="border px-4 py-2">Payment Status</th>
+            <th className="border px-4 py-2">Order Delivered</th>
+            <th className="border px-4 py-2">Requested Artist</th>
+            <th className="border px-4 py-2">Assigned Artist</th>
+            <th className="border px-4 py-2">Image</th>
           </tr>
         </thead>
         <tbody>
@@ -268,8 +286,29 @@ const Orders = () => {
           ))}
         </tbody>
       </table>
+
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded-l"
+        >
+          Previous
+        </button>
+        <span className="bg-gray-200 text-gray-600 font-bold py-2 px-4">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded-r"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
 
 export default Orders;
+
