@@ -129,12 +129,33 @@ export default function Edituser() {
   };
 
 
-  const handledelete = () => {
-    console.log("delete");
+  const handledelete = async(id) => {
+    try {
+      const response = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}artists/${id}`);
+      setSuccessMessage(response.data.success);
+      setTimeout(() => {
+        window.location.reload();
+        setSuccessMessage("");
+      }, 2000);
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.status === 401) {
+        logout();
+        setErrorMessage('Unauthorized. Please login again.');
+        setTimeout(() => {
+          setErrorMessage("")
+        }, 2000);
+        return;
+      }
+
+      setErrorMessage(error.response.data.error);
+      setTimeout(() => {
+        setErrorMessage("")
+      }, 2000);
+    }
   }
   const handleviewportfolio = (id) => {
     navigate(`/artist/${id}`, { replace: false })
-    console.log("view portfolio")
   }
 
   return (
@@ -143,20 +164,23 @@ export default function Edituser() {
       {successMessage && <MessageComponent type="success" message={successMessage} />}
       {errorMessage && <MessageComponent type="error" message={errorMessage} />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {artists.map(artist => (
-          <div key={artist._id} className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500">
-            <img src={`${process.env.REACT_APP_IMAGE_URL}${artist.imageUrl}`} alt={artist.name} className="w-full h-48 object-cover mb-2" />
-            <p className="text-lg font-semibold">{artist.name}</p>
-            <div className={`p-2 w-[40%] font-bold rounded-md z-50 mb-[5px] ${artist.availability ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700'}`}>
-              {artist.availability ? "Available" : "Not Available"}
+        {
+          artists.length>0 ? (artists.map(artist => (
+            <div key={artist._id} className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500">
+              <img src={`${process.env.REACT_APP_IMAGE_URL}${artist.imageUrl}`} alt={artist.name} className="w-full h-48 object-cover mb-2" />
+              <p className="text-lg font-semibold">{artist.name}</p>
+              <div className={`p-2 w-[40%] font-bold rounded-md z-50 mb-[5px] ${artist.availability ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700'}`}>
+                {artist.availability ? "Available" : "Not Available"}
+              </div>
+              <div className="flex justify-between mt-4">
+                <button className="bg-red-500 text-white px-4 py-2 rounded-md" onClick={()=>{handledelete(artist._id)}}>Delete</button>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleEditClick(artist)}>Edit</button>
+                <button className="bg-purple-500 text-white px-4 py-2 rounded-md" onClick={() => handleviewportfolio(artist._id)}>View portfolio</button>
+              </div>
             </div>
-            <div className="flex justify-between mt-4">
-              <button className="bg-red-500 text-white px-4 py-2 rounded-md" onClick={handledelete}>Delete</button>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleEditClick(artist)}>Edit</button>
-              <button className="bg-purple-500 text-white px-4 py-2 rounded-md" onClick={() => handleviewportfolio(artist._id)}>View portfolio</button>
-            </div>
-          </div>
-        ))}
+          ))):<h2 className='text-3xl font-bold mb-4'>No Artist Found</h2>
+        }
+        
       </div>
 
       {selectedArtist && (

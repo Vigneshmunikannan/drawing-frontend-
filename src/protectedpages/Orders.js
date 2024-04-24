@@ -160,7 +160,7 @@ const Orders = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 px-16">
       {successMessage && <MessageComponent type="success" message={successMessage} />}
       {errorMessage && <MessageComponent type="error" message={errorMessage} />}
 
@@ -287,7 +287,7 @@ const Orders = () => {
         </tbody>
       </table>
 
-      <div className="mt-4 flex justify-center">
+      <div className="mt-4 flex justify-center items-center">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
